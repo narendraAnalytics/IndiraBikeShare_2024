@@ -9,6 +9,12 @@ This project analyzes bikeshare data to understand user behavior, optimize prici
 - **Data Cleaning:** Ensured data quality by handling missing values, correcting inconsistencies, and formatting columns.
 - **Preprocessing:** Applied SQL queries for feature engineering, normalizing data, and generating insights for analysis.
 - **Feature Engineering:** Extracted key features such as trip duration, user type analysis, and peak hours.
+- **Power BI Dashboard:** An interactive dashboard was created to visualize key metrics and insights. The dashboard provides a comprehensive view of bikeshare data and financial performance.
+
+---
+
+### Power BI Dashboard
+Access the interactive dashboard here: [Indira Bikeshare Power BI Dashboard](<Insert_Power_BI_Dashboard_Link_Here>)
 
 ---
 
