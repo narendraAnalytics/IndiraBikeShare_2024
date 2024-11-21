@@ -64,6 +64,17 @@ This dataset contains financial details for bikeshare stations.
 ## Tools and Technologies
 - **SQL:** Used for data cleaning and preprocessing.
 - **Python (Pandas):** Analyzed and visualized data.
+- **Power BI:** Created an interactive dashboard for data visualization and insights.
+
+  ## Key Insights
+- **User Behavior:** The analysis reveals peak usage hours and identifies the most active stations, helping optimize resource allocation.
+- **Financial Insights:** The financial data highlights station profitability trends, providing insights for pricing strategy adjustments.
+- **Seasonal Trends:** Seasonal analysis showcases user preferences across different weather conditions, aiding in marketing strategies.
+
+## Future Scope
+- **Predictive Analytics:** Implementing machine learning models to predict user demand based on historical data and external factors like weather.
+- **Real-Time Dashboard:** Integrate real-time data streaming into the Power BI dashboard for live monitoring and insights.
+- **Integration with APIs:** Adding external data sources such as weather or public transportation APIs to enhance analysis accuracy and depth.
 
 ## SQL Queries
 ### Data Cleaning
