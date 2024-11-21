@@ -1,0 +1,615 @@
+--  View the Structure of the Tables
+------ Query the Information Schema
+
+---- Get detailed information about the bikesharedata table
+
+SELECT
+	COLUMN_NAME,DATA_TYPE,IS_NULLABLE,COLUMN_DEFAULT
+FROM
+	INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'bikesharedata';
+
+-- Get detailed information about the bikesharefinancial_data table
+
+SELECT
+	COLUMN_NAME,DATA_TYPE,IS_NULLABLE,COLUMN_DEFAULT
+FROM
+	INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'bikesharefinancial_data';
+
+-- Alter the column to change it from VARCHAR to DATE
+----------------------------------------------
+ALTER TABLE bikesharedata
+ALTER COLUMN Date DATE;
+------------------------------------------------
+
+-- Step 1: Add a new column
+
+ALTER TABLE bikesharedata
+add  Quater INT;
+
+-- Step 2: Update the new column with the calculated quarter values
+
+UPDATE bikesharedata
+SET Quater = CASE 
+                WHEN MONTH(date) BETWEEN 1 AND 3 THEN 1
+                WHEN MONTH(date) BETWEEN 4 AND 6 THEN 2
+                WHEN MONTH(date) BETWEEN 7 AND 9 THEN 3
+                WHEN MONTH(date) BETWEEN 10 AND 12 THEN 4
+              END;
+
+----------------------------------------------------------------------
+-- Count the Number of Records
+
+SELECT
+	count(*)
+FROM
+	bikesharedata;
+-- 12500
+
+SELECT
+	count(*)
+FROM
+	bikesharefinancial_data;
+-- 30
+
+-----------------------------------------------------------------------------------------------------------------------
+
+-- Check for Duplicates
+
+SELECT	
+	user_id,
+    count(*)
+FROM
+	bikesharedata
+GROUP by user_id
+HAVING count(*)>1;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+-- Using Window Functions to Find Duplicates
+
+SELECT *,
+       ROW_NUMBER() over(partition by user_id ORDER by date) as row_num
+FROM bikesharedata
+HAVING row_num > 1;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+-- -- Count NULL values for each column in bikesharedata
+
+
+SELECT
+	sum(case when user_id is null then 1 else 0 end) as Null_Id_Values,
+    sum(case when date is null then 1 else 0 end) as Date_Null_Values,
+    sum(case when user_age is null then 1 else 0 end) as Age_Null_Values,
+    sum(case when user_gender is null then 1 else 0 end) as AgeGender_Values
+FROM
+	bikesharedata;
+
+-----------------------------------------------------------------------------------------------------------------------------
+    
+
+-- Basic Summary Statistics (Numerical Columns)
+
+SELECT top 5 * from bikesharedata;
+
+SELECT
+	min(user_age) as Minimum_Age,
+    max(user_age) as Maximun_age,
+    min(temperature) as Minimum_Temperature,
+    max(temperature) as Maximum_Temperature,
+    min(trip_duration) as Minimun_Duration,
+    max(trip_duration) as Maximun_Duration,
+    avg(trip_duration) as Average_Duration
+FROM
+	bikesharedata;
+    
+-----------------------------------------------------------------------------------------------------------------------
+SELECT
+	station_id,
+    count(*) as Total_Count
+FROM
+	bikesharedata
+GROUP by station_id
+ORDER by Total_Count desc;
+
+----------------------------------------------------------------------------------------------------------------------------
+SELECT
+	station_location,
+    count(*) as Count_Location
+FROM
+	bikesharedata
+GROUP by station_location
+order by Count_Location desc;
+-----------------------------------------------------------
+
+SELECT
+	bike_type,
+    count(*) as Bike_Type_Count
+FROM
+	bikesharedata
+GROUP by bike_type
+order by Bike_Type_Count DESC;
+
+-----------------------------------------------------------------------------
+
+SELECT
+	rider_type,
+    count(*) as Rider_Type_Count
+FROM
+	bikesharedata
+GROUP by rider_type
+order by Rider_Type_Count DESC;
+
+-------------------------------------------------------------------------------------
+
+SELECT
+	season,
+    COUNT(*) as Season_Count
+FROM
+	bikesharedata
+GROUP by season
+ORDER by Season_Count DESC;
+
+----------------------------------------------------------------------------------------
+
+SELECT
+	weather_conditions,
+    count(*) as Count_WeatherConditions
+FROM
+	bikesharedata
+GROUP by weather_conditions
+ORDER by Count_WeatherConditions DESC;
+
+--------------------------------------------------------------------------------------------------------------------
+
+ALTER TABLE bikesharedata
+add Time_Of_Day varchar(20);
+
+update bikesharedata
+set  Time_Of_Day = case
+	when hour >=6 and hour <12 then 'Morning'
+    when hour >=12 and hour <18 then 'AfterNoon'
+    when hour >=18 and hour <24 then 'Evening'
+    else 'Night'
+end;    
+
+-------------------------------------------------------------------------------------------------------------
+SELECT
+	time_of_day,
+    count(*) as Time_Day_Count
+FROM
+	bikesharedata
+GROUP by time_of_day
+order by Time_Day_Count DESC;
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+-- To find the total number of rides.
+
+SELECT
+	COUNT(*)
+FROM
+	bikesharedata;
+    
+-- 12500
+
+------------------------------------------------------------------------------------------------------------------------
+
+-- To calculate the total revenue across Years.
+
+SELECT
+	bd.Year,
+	round(sum(bd.Trip_Duration * bf.Price_per_Minute),2) as Price_Minutes
+FROM
+	bikesharedata bd
+JOIN bikesharefinancial_data bf on bd.Station_ID = bf.Station_ID 
+GROUP by bd.Year
+order by Price_Minutes DESC;
+
+----------------------------------------------------------------------------------------------------------------------------
+
+-- To identify the most popular station based on the number of rides.
+
+SELECT
+	station_id,
+    station_location,
+    count(*) as Popular_Rides_Stations
+FROM
+	bikesharedata
+GROUP by station_id,station_location
+order by Popular_Rides_Stations desc;
+
+-------------------------------------------------------------------------------------------------------
+
+-- ---------------------------------------Basic Questions-- -------------------------------------------
+
+-- What is the total number of rides taken across all stations?
+
+SELECT
+	count(*) as Across_All_Stations
+FROM
+	bikesharedata;
+    
+-- 12500   
+-----------------------------------------------------------------------------------
+
+-- Which station has the highest number of rides?
+
+SELECT
+	top 3
+	station_id,
+    count(*) as Total_Rides
+FROM
+	bikesharedata
+GROUP by station_id
+order by Total_Rides desc;
+
+-- What is the total revenue generated in each year?
+
+SELECT
+	bf.Year,
+	round(sum(bf.Price_per_Minute * db.Trip_Duration),2) as Revenue
+FROM
+	bikesharefinancial_data bf
+JOIN bikesharedata db on bf.Station_ID = db.Station_ID
+GROUP by bf.Year
+order by Revenue desc;
+
+-------------------------------------------------------------------------------------------------------------
+
+-- How many rides occurred in a specific year (e.g., 2023)?
+
+SELECT
+	station_id,
+    station_location,
+    count(*) as Total_Riders
+FROM
+	bikesharedata
+where year = 2023    
+GROUP by station_id,station_location
+order by Total_Riders DESC;
+
+
+-------------------------------------------------------------------------------------------------------
+
+-- What are the distinct station locations available in the dataset?
+
+SELECT
+	DISTINCT(station_location)
+FROM
+	bikesharedata;
+    
+------------------------------------------------------------------------------------------------------    
+
+-- What is the average duration of rides across all stations?
+
+SELECT
+	station_location,
+	min(trip_duration) as Min_Duration,
+    max(trip_duration) as Max_Duration,
+	avg(trip_duration) as Avg_Duration
+FROM
+	bikesharedata
+GROUP by station_location;    
+
+------------------------------------------------------------------------------------------------------------------
+-- How many unique stations are in the dataset?
+
+SELECT
+	COUNT(DISTINCT station_location)
+FROM
+	bikesharedata;
+
+-------------------------------------------------------------------------------------------------------------------
+-- What is the minimum and maximum revenue generated by a station in a specific year?
+
+SELECT
+	bf.Year,
+    bf.Station_ID,
+	round(min(bd.Trip_Duration * bf.Price_Per_Minute),2) as Min_TotalRevenue,
+    round(max(bd.Trip_Duration * bf.Price_Per_Minute),2) as Max_TotalRevenue
+	
+FROM
+	bikesharedata bd
+JOIN bikesharefinancial_data bf on bd.Station_ID = bf.Station_ID
+WHERE bf.Year = 2023
+GROUP by bf.Year,bf.Station_ID
+ORDER by Max_TotalRevenue desc;
+
+-------------------------------------------------------------------------------------------------
+-- What are the most and least utilized stations?
+
+SELECT
+	station_id,
+    station_location,
+    count(*) as Rider_Count
+FROM
+	bikesharedata
+GROUP by station_id,station_location
+order by Rider_Count desc;
+
+-- What is the total cost of goods sold (COGS) for all stations?
+
+SELECT
+	station_location,
+    sum(cogs) as Goods_Sold
+FROM
+	bikesharefinancial_data
+GROUP by station_location
+ORDER by Goods_Sold DESC;
+
+----------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
+
+-- --------------------------------Intermediate Questions
+
+-- What is the average revenue per ride per station?
+
+SELECT
+	bf.Station_Location,
+    round(avg(bf.Price_per_Minute * bd.Trip_Duration),2) as Avg_Revenue
+FROM
+	bikesharedata bd
+JOIN bikesharefinancial_data bf on bd.Station_ID = bf.Station_ID
+GROUP by bf.Station_Location
+ORDER by Avg_Revenue desc;
+
+-- Which stations have seen the most growth in terms of number of rides over the years?
+with YearlyRideCount as (
+  SELECT
+      station_location,
+      year,
+      COUNT(*) as Riders_Count,
+      lag(COUNT(*)) over(partition by station_location order by year) as Previous_Year
+  FROM
+      bikesharedata
+  GROUP by station_location,year
+) 
+SELECT
+	station_location,
+    year,
+    Riders_Count,
+    Previous_Year,
+    (Riders_Count - Previous_Year) as growth
+FROM
+	YearlyRideCount
+WHERE  Previous_Year is NOT null
+order by growth desc;
+	
+-- What are the peak usage hours for each station?
+WITH HourlyCount as (
+  SELECT
+      station_id,
+      trip_start_time,
+      count(*) as Rider_Count,
+      rank() over(partition by station_id order by  count(*) DESC) as Rank_Row
+  FROM
+      bikesharedata
+  GROUP by station_id,trip_start_time
+)  
+SELECT
+	station_id,
+    trip_start_time,
+    Rider_Count,
+    Rank_Row
+FROM
+	HourlyCount
+where Rank_Row = 1
+order by Rider_Count;
+
+-----------------------------------------------------------------------------------------------------------------------
+
+
+-- How much profit was generated for each station in a specific year?
+with yearlyProfit as (
+SELECT
+	bd.Year,
+    bd.Station_Location,
+	round(sum((bk.Trip_Duration * bd.Price_per_Minute)-bd.COGS),2) as Profit
+    
+FROM
+	bikesharedata bk
+JOIN bikesharefinancial_data bd on bk.Station_ID = bd.Station_ID
+GROUP by bd.Year,bd.Station_Location
+)
+SELECT
+	Year,
+    Station_Location,
+    Profit
+FROM
+	yearlyProfit
+where year = 2023
+order by Profit desc;
+
+--------------------------------------------------------------------------------------------------------------------
+	
+	
+-- What is the average cost of goods sold (COGS) for each station?
+
+SELECT
+	station_id,
+    station_location,
+    avg(cogs) as Avg_COGS
+FROM
+	bikesharefinancial_data
+GROUP by station_id,station_location
+order by Avg_COGS DESC;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+-- How does the revenue vary by season or quarter for each station
+with Quater_Revenue as (
+  SELECT
+      bk.Station_ID,
+      bk.Quater,
+      round(sum((bk.Trip_Duration * bd.Price_per_Minute)-bd.COGS),2) as Profit
+  FROM
+      bikesharedata bk
+  JOIN bikesharefinancial_data bd on bk.Station_ID = bd.Station_ID
+  GROUP by bk.Station_ID,bk.Quater
+)
+SELECT
+	Station_ID,
+    Quater,
+    Profit
+FROM
+	Quater_Revenue
+order by Station_ID,Profit DESC;    
+	
+----------------------------------------------------------------------------------------------    
+    
+
+-- Which station had the highest operational cost in a given year?
+with OpeartionalCost as (
+  SELECT
+      station_id,
+      station_location,
+      year,
+      sum(cogs) as Total_Operational
+  FROM
+      bikesharefinancial_data
+  GROUP by station_id,station_location,year
+)
+SELECT
+	top 1
+	station_id,
+    station_location,
+    year,
+    Total_Operational
+FROM
+	OpeartionalCost
+where year = 2023
+ORDER by Total_Operational desc;
+	
+----------------------------------------------------------------------------------------------------------------
+-- What is the station-wise breakdown of ride durations?
+
+SELECT
+	station_id,
+    station_location,
+    avg(trip_duration) as Avg_TripDuration,
+    min(trip_duration) as Min_TripDuration,
+    max(trip_duration) as Max_TripDuration
+FROM
+	bikesharedata
+GROUP by station_id,station_location;    
+
+---------------------------------------------------------------------------------------------------------------------------
+
+-- How does customer usage vary between weekdays and weekends?
+
+SELECT
+	weekday,
+    count(*) as Riders_Count
+FROM
+	bikesharedata
+GROUP by weekday
+ORDER by Riders_Count DESC;
+
+-------------------------------------------------------------------------------------------------------------------------------
+-- What is the distribution of ride durations by station location?
+
+-----------------------------------------------------------------------------------------------
+
+--------------------------------------Advanced Questions
+
+-- Which station has the highest profitability, considering both revenue and cost of goods sold?
+
+with HighestProfits as (
+  SELECT
+      bf.Station_ID,
+      bf.Station_Location,
+      round(sum((bk.Trip_Duration * bf.Price_Per_Minute) - bf.COGS),2) as Total_Revenue
+  FROM
+      bikesharedata bk
+  JOIN bikesharefinancial_data bf on bk.Station_ID = bk.Station_ID    
+  GROUP by bf.Station_ID,bf.Station_Location
+)
+SELECT
+	top 3
+	Station_ID,
+    Station_Location,
+    Total_Revenue
+FROM
+	HighestProfits
+order by Total_Revenue desc;    
+
+--------------------------------------------------------------------------------------------------------------------
+
+-- What is the trend of revenue growth for each station over the years?
+
+with Revenue_Growth as (
+  SELECT
+      bf.Year,
+      bf.Station_Location,
+      round(sum((bk.Trip_Duration * bf.Price_Per_Minute) - bf.COGS),2) as Total_Revenue,
+  	  lag(round(sum((bk.Trip_Duration * bf.Price_Per_Minute) - bf.COGS),2)) over(partition by bf.Station_Location order by bf.Year) as Previous_Year
+  FROM
+      bikesharefinancial_data bf
+  JOIN bikesharedata bk on bf.Station_Location = bk.Station_Location
+  GROUP by bf.Year,bf.Station_Location
+)
+SELECT
+	Year,
+    Station_Location,
+    Total_Revenue,
+    Previous_Year,
+    (Total_Revenue - Previous_Year) as Growth
+FROM
+	Revenue_Growth
+WHERE Previous_Year is not null
+ORDER by Station_Location,Year;
+	
+------------------------------------------------------------------------------------------------------------------------
+-- Which stations have the highest number of rides during peak hours, and what are the peak hours?
+with Peak_Hours as (
+  SELECT
+      station_id,
+      station_location,
+      trip_start_time as Hour_Duration,
+      count(*) as Rider_Count,
+      rank() over(partition by station_id order by count(*) DESC) as Rank_Hour
+  FROM
+      bikesharedata
+  GROUP by station_id,station_location,trip_start_time
+)  
+SELECT
+	Station_ID,
+    Station_Location,
+    Hour_Duration,
+    Rider_Count,
+    Rank_Hour
+FROM
+	Peak_Hours
+WHERE Rank_Hour = 1    
+order by Station_ID;    
+	
+----------------------------------------------------------------------------------------------------------------------
+-- What is the correlation between ride duration and revenue across different stations?
+
+-- How does the financial performance (profit margins) vary across different locations and over the years?
+
+-- Which station contributes the most to overall profit, and why?
+with OverallProfit as (
+  SELECT
+      bf.Station_ID,
+      bf.Station_Location,
+      round(sum((bd.Trip_Duration * bf.Price_Per_Minute) - bf.COGS),2) as Revenue_Stataion
+  FROM
+      bikesharedata bd
+  JOIN bikesharefinancial_data bf on bd.Station_ID = bf.Station_ID
+  GROUP by bf.Station_ID,bf.Station_Location
+)  
+SELECT
+	top 1
+	Station_ID,
+    Station_Location,
+    Revenue_Stataion
+FROM
+	OverallProfit
+order by  Revenue_Stataion DESC;   
+
+-----------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
