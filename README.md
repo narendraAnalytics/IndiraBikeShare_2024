@@ -14,7 +14,7 @@ This project analyzes bikeshare data to understand user behavior, optimize prici
 ---
 
 ### Power BI Dashboard
-Access the interactive dashboard here: [Indira Bikeshare Power BI Dashboard](<[Insert_Power_BI_Dashboard_Link_Here](https://app.powerbi.com/view?r=eyJrIjoiNzJmMzBkZmMtODJkNS00NjdkLTgwMDctNjY4YWZhZTZhMmY3IiwidCI6ImEyZWE5ODRlLTlkYzYtNDU5ZS1iNDFkLTY1YWJmYWEzMTExYyJ9)>)
+Access the interactive dashboard here: [Indira Bikeshare Power BI Dashboard](<[(https://app.powerbi.com/view?r=eyJrIjoiNzJmMzBkZmMtODJkNS00NjdkLTgwMDctNjY4YWZhZTZhMmY3IiwidCI6ImEyZWE5ODRlLTlkYzYtNDU5ZS1iNDFkLTY1YWJmYWEzMTExYyJ9)>)]
 
 ---
 
